@@ -1,0 +1,9 @@
+{
+  "Merc_FLG": "TRA",
+  "Sub_Merc_Flg": "TRA01",
+  "SessionKeyName": "SessionKey01",
+  "RandomIV_Index": 2836,
+  "A_part_Index": 2556,
+  "B_part_HexString": "55FBA3B8742ACC0FC11D613E04921B05",
+  "SessionKeyCheckSum": "CD89F6E791B3FD77AA5C70AA34C784CBA5352869"
+}

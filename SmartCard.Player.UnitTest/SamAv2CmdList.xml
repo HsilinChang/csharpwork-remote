@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandList>
+  <ApduList>
+    <Apdu Name="SAM_GetVersion" Class="80" Ins="60" P1="00" P2="00" Le="00" />
+    <Apdu Name="SAM_Unlock" Class="80" Ins="10" P1="00" P2="00" Data="0000" Le="00" />
+  </ApduList>
+  <SequenceList>
+    <Sequence Name="SAM_GetVersion" >
+      <Command Apdu="SAM_GetVersion"/>
+    </Sequence>
+    <Sequence Name="SAM_Unlock_1" KNR_KVER="0000" >
+      <Command Apdu="SAM_Unlock" P1="00" Data="KNR_KVER"/>
+    </Sequence>
+    <Sequence Name="SAM_Unlock_2" MSG="0000" >
+      <Command Apdu="SAM_Unlock"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="SAM_Unlock_3" CLA="82" MSG="0000" >
+      <Command Apdu="SAM_Unlock" Data="MSG"/>
+    </Sequence>
+  </SequenceList>
+</CommandList>

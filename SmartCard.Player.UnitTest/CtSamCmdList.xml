@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandList>
+  <ApduList>
+    <Apdu Name="ReadBinary" Class="8F" Ins="B0" P1="00" P2="00" Le="10"/>
+    <Apdu Name="VerifyPin" Class="8F" Ins="20" P1="00" P2="00" P3="08" Data="1234567890123456"/>
+    <Apdu Name="SelectTsamObject" Class="81" Ins="A4" P1="00" P2="00" P3="02" Data="95CA" Le="10"/>
+    <Apdu Name="EncWithDK" Class="81" Ins="04" P1="00" P2="01" P3="18" Data="012345678901234567890123456789012345678901234567" Le="08"/>    
+  </ApduList>
+  <SequenceList>    
+    <Sequence Name="VerifyPin" PIN1="0" PIN2="1" PWD="1234567890123456" >     
+      <Command Apdu="VerifyPin" P1="PIN1" Data="PWD" />
+      <Command Apdu="VerifyPin" P1="PIN2" Data="PWD" />
+    </Sequence>
+    <Sequence Name="EncWithDK" MKN="7" DATA="012345678901234567890123456789012345678901234567" >
+      <Command Apdu="EncWithDK" P1="MKN" Data="DATA"/>
+    </Sequence>
+  </SequenceList>
+</CommandList>

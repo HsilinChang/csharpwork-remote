@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ApduList>
+  <Apdu Name="SelectPDF" Class="00" Ins="A4" P1="03" P2="00" />
+  <Apdu Name="SelectDF" Class="00" Ins="A4" P1="01" P2="00" P3="02" Data="0000"/>
+  <Apdu Name="SelectEF" Class="00" Ins="A4" P1="02" P2="00" P3="02" Data="0000"/>
+  <Apdu Name="ReadRecord" Class="00" Ins="B2" P1="0" P2="4" Le="00"/>
+  <Apdu Name="ReadAllRecord" Class="00" Ins="B2" P1="01" P2="05" Le="00"/>
+  <Apdu Name="ReadBalance" Class="00" Ins="5C" P1="95" P2="07" Le="08"/>
+  <Apdu Name="ReadBinary" Class="00" Ins="B0" P1="00" P2="04" Le="08"/>
+  <Apdu Name="GenRandom" Class="00" Ins="86" P1="00" P2="00" Le="08"/>
+  <Apdu Name="TermAuth" Class="00" Ins="82" P1="00" P2="08" P3="08" Data="0000000000000000"/>
+</ApduList>

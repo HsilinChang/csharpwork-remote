@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandList>
+  <ApduList>
+    <Apdu Name="SelectMDF" Class="00" Ins="A4" P1="01" P2="00" P3="02" Data="3F00" />
+    <Apdu Name="SelectPDF" Class="00" Ins="A4" P1="03" P2="00" />
+    <Apdu Name="SelectDF" Class="00" Ins="A4" P1="01" P2="00" P3="02" Data="0000"/>
+    <Apdu Name="SelectEF" Class="00" Ins="A4" P1="02" P2="00" P3="02" Data="0000"/>
+    <Apdu Name="ListFile" Class="00" Ins="AA" P1="00" P2="00" Le="000000" />
+    <Apdu Name="ReadRecord" Class="00" Ins="B2" P1="0" P2="4" Le="00"/>
+    <Apdu Name="ReadAllRecord" Class="00" Ins="B2" P1="01" P2="05" Le="00"/>
+    <Apdu Name="ReadBalance" Class="00" Ins="5C" P1="95" P2="07" Le="08"/>
+    <Apdu Name="ReadBinary" Class="00" Ins="B0" P1="00" P2="04" Le="08"/>
+    <Apdu Name="GenRandom" Class="00" Ins="86" P1="00" P2="00" Le="08"/>
+    <Apdu Name="TermAuth" Class="00" Ins="82" P1="00" P2="08" P3="08" Data="0234567891123456"/>    
+    <Apdu Name="VerifyPin" Class="00" Ins="20" P1="00" P2="08" P3="08" Data="01020304FFFFFFFF"/>
+  </ApduList>
+  <SequenceList>
+    <Sequence Name="Select_DF_EF" DF="7110" EF="7101">
+      <Command Apdu="SelectMDF"/>
+      <Command Apdu="SelectDF" Data="DF"/>
+      <Command Apdu="SelectEF" Data="EF"/>
+    </Sequence>
+    <Sequence Name="Select_DF" DF="7011">
+      <Command Apdu="SelectMDF"/>
+      <Command Apdu="SelectDF" Data="DF"/>
+    </Sequence>
+    <Sequence Name="Select_EF" EF="7101">
+      <Command Apdu="SelectEF" Data="EF"/>
+    </Sequence>
+    <Sequence Name="ListFile" DF="7110">
+      <Command Apdu="SelectMDF"/>
+      <Command Apdu="SelectDF" Data="DF"/>
+      <Command Apdu="ListFile"/>
+    </Sequence>
+    <Sequence Name="Select_DF7110_EF7101" DF="7110" EF="7101">
+      <Command Sequence="Select_DF_EF" />
+    </Sequence>
+    <Sequence Name="Select_DF7011_EF7008" DF="7011" EF="7008">
+      <Command Sequence="Select_DF_EF" />
+    </Sequence>
+    <Sequence Name="Select_DF7011_EF7009" DF="7011" EF="7009">
+      <Command Sequence="Select_DF_EF" />
+    </Sequence>
+    <Sequence Name="GetCID" Record="2" Le="12">
+      <Command Sequence="Select_DF7110_EF7101"/>
+      <Command Apdu="ReadRecord" P1="Record" Le="Le" />
+    </Sequence>
+    <Sequence Name="GetIDollar">
+      <Command Sequence="Select_DF7011_EF7008"/>
+      <Command Apdu="ReadAllRecord" />
+    </Sequence>
+    <Sequence Name="GetHistory" Record="1" >
+      <Command Sequence="Select_DF7011_EF7009"/>
+      <Command Apdu="ReadRecord" P1="Record" />
+    </Sequence>
+    <Sequence Name="ReadBalance" >
+      <Command Apdu="SelectPDF"/>
+      <Command Apdu="ReadBalance" />
+    </Sequence>
+    <Sequence Name="ReadBinary" DF="3F00">
+      <Command Apdu="SelectDF" Data="DF"/>
+      <Command Apdu="ReadBinary" />
+    </Sequence>
+    <Sequence Name="GenRandom" >
+      <!--<Command Apdu="SelectDF" Data="DF"/>-->
+      <Command Apdu="GenRandom"/>
+    </Sequence>
+    <Sequence Name="TermAuth" KQ="08" DATA="0102030405060708" >
+      <Command Apdu="TermAuth" P2="KQ" Data="DATA"/>
+    </Sequence>
+    <Sequence Name="VerifyPin" PQ="10" DATA="31323334FFFFFFFF" >
+      <!--<Command Apdu="SelectDF" Data="DF"/>-->
+      <Command Apdu="VerifyPin" P2="PQ" Data="DATA"/>
+    </Sequence>
+    <Sequence Name="ReadKey" EF="0032">
+      <Command Sequence="Select_EF" Data="EF"/>
+      <Command Apdu="ReadAllRecord" />
+    </Sequence>
+  </SequenceList>
+</CommandList>

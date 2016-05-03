@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CommandList>
+  <ApduList>
+    <Apdu Name="GetUID" Class="FF" Ins="CA" P1="00" P2="00" Le="00" />
+    <Apdu Name="GetAIDS" Class="90" Ins="6A" P1="00" P2="00" Le="00" />
+    <Apdu Name="GetVersion" Class="90" Ins="60" P1="00" P2="00" Le="00" />
+    <Apdu Name="Continue" Class="90" Ins="AF" P1="00" P2="00" Le="00" />
+    <Apdu Name="ContinueWithData" Class="90" Ins="AF" P1="00" P2="00" P3="20"
+          Data="1234567890123456789012345678901234567890123456789012345678901234" Le="00" />
+    <Apdu Name="SelectAID" Class="90" Ins="5A" P1="00" P2="00" P3="03" Data="000000" Le="00" />
+    <Apdu Name="CreateApplication" Class="90" Ins="CA" P1="00" P2="00" P3="05" Data="0000000000" Le="00" />
+    <Apdu Name="DeleteApplication" Class="90" Ins="DA" P1="00" P2="00" P3="05" Data="0000000000" Le="00" />
+    <Apdu Name="AuthenticateAES" Class="90" Ins="AA" P1="00" P2="00" P3="01" Data="00" Le="00" />
+    <Apdu Name="Authenticate(3)DES" Class="90" Ins="0A" P1="00" P2="00" P3="01" Data="00" Le="00" />
+    <Apdu Name="ReadData" Class="90" Ins="BD" P1="00" P2="00" P3="07" Data="00000000000000" Le="00"/>
+    <Apdu Name="WriteData" Class="90" Ins="3D" P1="00" P2="00" P3="08" Data="1234567890123456" Le="00"/>
+    <Apdu Name="CommitTransaction" Class="90" Ins="C7" P1="00" P2="00" Le="00"/>
+    <Apdu Name="GetKeyVersion" Class="90" Ins="64" P1="00" P2="00" P3="01" Data="00" Le="00" />
+    <Apdu Name="GetKeySettings" Class="90" Ins="45" P1="00" P2="00" Le="00" />
+    <Apdu Name="GetCardUID" Class="90" Ins="51" P1="00" P2="00" Le="00"/>
+    <Apdu Name="GetFileSettings" Class="90" Ins="F5" P1="00" P2="00" P3="01" Data="00" Le="00" />
+    <Apdu Name="ReadRecords" Class="90" Ins="BB" P1="00" P2="00" P3="07" Data="0D000000000000" Le="00"/>
+    <Apdu Name="GetValue" Class="90" Ins="6C" P1="00" P2="00" P3="01" Data="06" Le="00"/>
+    <Apdu Name="Debit" Class="90" Ins="DC" P1="00" P2="00" P3="05" Data="0600000000" Le="00"/>
+    <Apdu Name="Credit" Class="90" Ins="0C" P1="00" P2="00" P3="05" Data="0600000000" Le="00"/>
+    <Apdu Name="ChangeKey" Class="90" Ins="C4" P1="00" P2="00" P3="05" Data="8000000000" Le="00"/>
+    <Apdu Name="FormatPICC" Class="90" Ins="FC" P1="00" P2="00" Le="00"/>
+    <Apdu Name="CreateStdDataFile" Class="90" Ins="CD" P1="00" P2="00" P3="07" Data="80000000000000" Le="00" />
+    <Apdu Name="CreateBackupDataFile" Class="90" Ins="CB" P1="00" P2="00" P3="07" Data="80000000000000" Le="00" />
+    <Apdu Name="CreateValueFile" Class="90" Ins="CC" P1="00" P2="00" P3="0D" Data="0102030405060708090A0B0C0D" Le="00" />
+    <Apdu Name="CreateCyclicRecordFile" Class="90" Ins="C0" P1="00" P2="00" P3="0A" Data="0102030405060708090A" Le="00" />
+    <Apdu Name="ChangeFileSettings" Class="90" Ins="5F" P1="00" P2="00" P3="04" Data="80000000" Le="00" />
+    <Apdu Name="ChangeKeySettings" Class="90" Ins="54" P1="00" P2="00" P3="04" Data="80000000" Le="00" />
+  </ApduList>
+  <SequenceList>
+    <Sequence Name="FormatPICC">
+      <Command Apdu="FormatPICC"/>
+    </Sequence>
+    <Sequence Name="GetUID">
+      <Command Apdu="GetUID"/>
+    </Sequence>
+    <Sequence Name="SelectPICC" AID="000000">
+      <Command Apdu="SelectAID" Data="AID"/>
+    </Sequence>
+    <Sequence Name="GetAIDS" >
+      <Command Sequence="SelectPICC"/>
+      <Command Apdu="GetAIDS"/>
+    </Sequence>
+    <Sequence Name="SelectAID" AID="118716">
+      <Command Apdu="SelectAID" Data="AID"/>
+    </Sequence>
+    <Sequence Name="ReadData" FD="00000000000000">
+      <Command Apdu="ReadData" Data="FD"/>
+    </Sequence>
+    <Sequence Name="ReadLatestLoad" AID="118716" FD="10000000330000">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="ReadData" Data="FD"/>
+    </Sequence>
+    <Sequence Name="WriteData" LEN="08" MSG="0508000001000002">
+      <Command Apdu="WriteData" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="GetCID" AID="118716" FD="03000000080000">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Sequence="ReadData" Data="FD"/>
+    </Sequence>
+    <Sequence Name="GetAutoload" AID="118716" FD="13000000100000">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Sequence="ReadData" Data="FD"/>
+    </Sequence>
+    <Sequence Name="ReadRecords" AID="118716" LEN="07" MSG="0D000000000000">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="ReadRecords" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="GetVersion">
+      <Command Sequence="SelectPICC"/>
+      <Command Apdu="GetVersion"/>
+      <Command Apdu="Continue" />
+      <Command Apdu="Continue" />
+    </Sequence>
+    <Sequence Name="GetKeyVersion" KNR="0A" >
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="GetKeyVersion" Data="KNR"/>
+    </Sequence>/>
+    <Sequence Name="GetKeySettings" AID="118716" >
+      <!--<Command Sequence="SelectAID" Data="AID"/>-->
+      <Command Apdu="GetKeySettings" />
+    </Sequence>/>
+    <Sequence Name="AuthenticateAES" AID="118716" KNR="0A">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="AuthenticateAES" Data="KNR"/>
+    </Sequence>
+    <Sequence Name="AuthenticateAES_Tx" KNR="0A">
+      <Command Apdu="AuthenticateAES" Data="KNR"/>
+    </Sequence>
+    <Sequence Name="Authenticate(3)DES" AID="000000" KNR="00">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="Authenticate(3)DES" Data="KNR"/>
+    </Sequence>
+    <Sequence Name="ContinueWithData" LEN="20" MSG="1234567890123456789012345678901234567890123456789012345678901234">
+      <Command Apdu="ContinueWithData" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="GetFileSettings" FNR="01" >
+      <Command Apdu="GetFileSettings" Data="FNR"/>
+    </Sequence>/>
+    <Sequence Name="GetValue" AID="118716" FD="06">
+      <Command Sequence="SelectAID" Data="AID"/>
+      <Command Apdu="GetValue" Data="FD"/>
+    </Sequence>
+    <Sequence Name="GetValueNoAID" FD="06">
+      <Command Apdu="GetValue" Data="FD"/>
+    </Sequence>
+    <Sequence Name="GetWtCnt" FD="0E000000040000">
+      <Command Apdu="ReadData" Data="FD"/>
+    </Sequence>
+    <Sequence Name="Debit" LEN="08" MSG="0508000001000002">
+      <Command Apdu="Debit" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="Credit" LEN="08" MSG="0508000001000002">
+      <Command Apdu="Credit" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="CreateApplication" MSG="1187160F8E">
+      <Command Apdu="CreateApplication" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="DeleteApplication" MSG="118716">
+      <Command Apdu="DeleteApplication" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="ChangeKey" LEN="08" MSG="0508000001000002">
+      <Command Apdu="ChangeKey" P3="LEN" Data="MSG"/>
+    </Sequence>
+    <Sequence Name="CreateStdDataFile" MSG="01020304050607">
+      <Command Apdu="CreateStdDataFile"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="CreateBackupDataFile" MSG="01020304050607">
+      <Command Apdu="CreateBackupDataFile"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="CreateValueFile" MSG="0102030405060706090A0B0C0D">
+      <Command Apdu="CreateValueFile"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="CreateCyclicRecordFile" MSG="0102030405060706090A">
+      <Command Apdu="CreateCyclicRecordFile"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="ChangeFileSettings" MSG="01020304">
+      <Command Apdu="ChangeFileSettings"  Data="MSG"/>
+    </Sequence>
+    <Sequence Name="ChangeKeySettings" MSG="01020304">
+      <Command Apdu="ChangeKeySettings"  Data="MSG"/>
+    </Sequence>
+  </SequenceList>
+</CommandList>

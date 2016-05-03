@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<objects xmlns="http://www.springframework.net">
+  <!-- TRTC SamAV1Manager -->
+  <object id="trtSamAV1Manager" type="SmartCard.SamAV2.TrtSamAV1Manager, SmartCard.SamAV2" singleton="false">
+    <property name="ApduPlayer" ref="apduPlayer"/>
+    <property name="HexConverter" ref="hexConverter"/>
+    <property name="ByteWorker" ref="byteWorker"/>
+    <property name="KeyDeriver" ref="aes128KeyDeriver"/>
+    <property name="RandWorker" ref="randWorker" />
+    <property name="AesCryptor" ref="aesCryptor" />
+    <property name="TripleDesCbcCryptor" ref="tripleDesCbcCryptor"/>
+    <property name="CMacWorker" ref="aes128CMacWorker"/>
+    <property name="ApduURL" value="SmartCard.SamAV2.Config.SamAv2CmdList.xml"/>
+    <property name="NxpCrc16Worker" ref="nxpCrc16Worker"/>
+    <property name="NxpCrc32Worker" ref="nxpCrc32Worker"/>
+  </object>
+  <!-- SamAV2Manager -->
+  <object id="samAV2Manager" type="SmartCard.SamAV2.SamAV2Manager, SmartCard.SamAV2" singleton="false">
+    <property name="ApduPlayer" ref="apduPlayer"/>
+    <property name="HexConverter" ref="hexConverter"/>
+    <property name="ByteWorker" ref="byteWorker"/>
+    <property name="KeyDeriver" ref="aes128KeyDeriver"/>
+    <property name="RandWorker" ref="randWorker" />
+    <property name="AesCryptor" ref="aesCryptor" />
+    <property name="TripleDesCbcCryptor" ref="tripleDesCbcCryptor"/>
+    <property name="CMacWorker" ref="aes128CMacWorker"/>
+    <property name="ApduURL" value="SmartCard.SamAV2.Config.SamAv2CmdList.xml"/>
+    <property name="NxpCrc16Worker" ref="nxpCrc16Worker"/>
+  </object>
+  <!-- MkSessionManager -->
+  <object id="mkSessionManager" type="SmartCard.SamAV2.MkSessionManager, SmartCard.SamAV2" >
+    <property name="RndMapper" ref="rndMapper"/>
+    <property name="HexConverter" ref="hexConverter"/>
+    <property name="ByteWorker" ref="byteWorker"/>
+    <property name="AesCryptor" ref="aesCryptor" />
+    <property name="HashWorker" ref="hashWorker"/>
+  </object>
+  <object id="rndMapper" type="SmartCard.SamAV2.RndMapper, SmartCard.SamAV2" />
+</objects>

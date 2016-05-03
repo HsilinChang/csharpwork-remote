@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RandomGenerator</name>
+    </assembly>
+    <members>
+        <member name="T:RandomGenerator.IRndGenerator">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:RandomGenerator.IRndGenerator.Get_RandomFromIndex(System.Int32)">
+            <summary>
+            input index then find a random array(16 bytes)
+            max index call GetMaxIndex method
+            </summary>
+            <param name="index">start index</param>
+            <returns>16 bytes</returns>
+        </member>
+        <member name="M:RandomGenerator.IRndGenerator.Get_Random(System.Int32@)">
+            <summary>
+            get a random array(16 bytes) and output start index
+            </summary>
+            <param name="index">output start index</param>
+            <returns>a random array(16 bytes)</returns>
+        </member>
+        <member name="M:RandomGenerator.IRndGenerator.GetMaxIndex">
+            <summary>
+            get Max Index
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:RandomGenerator.ISessionKeyGenerator">
+            <summary>
+            產生指定的RanDom A 值
+            </summary>
+        </member>
+        <member name="M:RandomGenerator.ISessionKeyGenerator.GetRanA(System.Int32)">
+            <summary>
+            get Random A from start index
+            </summary>
+            <param name="startIndex">start index</param>
+            <returns>16 Byte Array</returns>
+        </member>
+        <member name="M:RandomGenerator.ISessionKeyGenerator.GetSessionKey(System.Int32,System.Byte[])">
+            <summary>
+            get session key(16 bytes)
+            SesKey = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+            <param name="ranAStartIndex">Random A start index</param>
+            <param name="ranB">Random B</param>
+            <returns>Session Key(16 bytes)</returns>
+        </member>
+        <member name="M:RandomGenerator.ISessionKeyGenerator.GetTotalLength">
+            <summary>
+            get Random A total length
+            </summary>
+            <returns>length</returns>
+        </member>
+        <member name="T:RandomGenerator.RndGenerator">
+            <summary>
+            提供ZMK處理SessionKey的亂數產生表
+            </summary>
+        </member>
+        <member name="F:RandomGenerator.RndGenerator.DATA_LENGTH">
+            <summary>
+            指定的長度
+            </summary>
+        </member>
+        <member name="M:RandomGenerator.RndGenerator.Get_RandomFromIndex(System.Int32)">
+            <summary>
+            input index then find a random array(16 bytes)
+            </summary>
+            <param name="index">input index</param>
+            <returns>16 bytes random data</returns>
+        </member>
+        <member name="M:RandomGenerator.RndGenerator.Get_Random(System.Int32@)">
+            <summary>
+            get a random array(16 bytes) and output start index
+            </summary>
+            <param name="index">output start index</param>
+            <returns>a random array(16 bytes)</returns>
+        </member>
+        <member name="M:RandomGenerator.RndGenerator.WriteFile(System.Int32,System.String)">
+            <summary>
+            產生指定大小的隨機byte數據檔案
+            </summary>
+            <param name="randomCount">byte數量</param>
+        </member>
+        <member name="T:RandomGenerator.SessionKeyGenerator">
+            <summary>
+            產生指定的RanDom A 值
+            </summary>
+        </member>
+        <member name="F:RandomGenerator.SessionKeyGenerator.DataLength">
+            <summary>
+            指定的長度
+            </summary>
+        </member>
+        <member name="M:RandomGenerator.SessionKeyGenerator.GetRanA(System.Int32)">
+            <summary>
+            取得16 byte的隨機值
+            </summary>
+            <param name="startIndex">指定的起始位置</param>
+            <returns>16byte的隨機值</returns>
+        </member>
+        <member name="M:RandomGenerator.SessionKeyGenerator.GetTotalLength">
+            <summary>
+            取得隨機陣列總長度
+            </summary>
+            <returns>Ran array Total Length</returns>
+        </member>
+        <member name="M:RandomGenerator.SessionKeyGenerator.WriteFile(System.Int32)">
+            <summary>
+            產生指定大小的隨機byte數據檔案
+            </summary>
+            <param name="randomCount">byte數量</param>
+        </member>
+        <member name="M:RandomGenerator.SessionKeyGenerator.GetSessionKey(System.Int32,System.Byte[])">
+            <summary>
+            取得Session Key(16 bytes)
+            SesKey = rndA[0..3] || rndB[0..3] || rndA[12..15] || rndB[12..15]
+            </summary>
+            <param name="ranAStartIndex">Random A Start Index</param>
+            <param name="ranB">Random B</param>
+            <returns>Session Key(16 bytes)</returns>
+        </member>
+    </members>
+</doc>

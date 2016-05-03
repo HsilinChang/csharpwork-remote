@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CARDLIST>
+   <CARDS>
+     <CARD uid="047F37A2DD2F80" cid="7211130986000010" desc="icash2 card for iiiedc test"/>
+     <CARD uid="04187222EB3580" cid="7511130991000084" desc="icash2 card for iiiedc test"/>
+     <CARD uid="04351D22162980" cid="7611140992000044" desc="icash2 card for iiiedc test"/>
+     <CARD uid="04322222162980" cid="7611140993000024" desc="icash2 card for iiiedc test"/>
+     <CARD uid="04063CEAA53080" cid="7111140983000038" desc="icash2 card for crf test"/>
+     <CARD uid="040659EAA53080" cid="7111140988000005" desc="icash2 card for crf test"/>
+     <CARD uid="04427122EB3580" cid="7511130995000088" desc="icash2 card for crf test"/>
+     <CARD uid="04032B4AFA3680" cid="7111140988000005" desc="icash2 card for crf test"/>
+     <CARD uid="04608CCA3D2480" cid="0417149985000016" desc="icash bank card"/>
+     <CARD uid="04652F6A633A80" cid="0817159980000024" desc="icash bank card"/>
+     <CARD uid="047B8B7AD23B80" cid="5317150018000016" desc="icash bank card"/>
+     <CARD uid="040C31CA753A80" cid="0817159988000026" desc="icash bank card"/>
+     <CARD uid="045106CA753A80" cid="0817159984000023" desc="icash bank card"/>
+   </CARDS>
+</CARDLIST>
