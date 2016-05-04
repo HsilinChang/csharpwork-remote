@@ -5,6 +5,7 @@ using System.Text;
 //
 using Newtonsoft.Json;
 using Kms2.Crypto.Utility;
+using Kms2.Crypto.Common;
 
 namespace SmartCard.SamAV2
 {
@@ -32,6 +33,17 @@ namespace SmartCard.SamAV2
 
         [JsonConverter(typeof(ByteArrayConvertor))]
         public byte[] Km { get; set; }
+
+        public byte CmdCtr { get; set; }
+
+        [JsonConverter(typeof(ByteArrayConvertor))]
+        public byte[] CmdCtrBytes 
+        { 
+            get
+            { 
+                return new byte[] { 0x00, 0x00, 0x00, CmdCtr };
+            }
+        }
 
         ///// <summary>
         ///// P1 in AV1 mode

@@ -27,6 +27,7 @@ namespace SmartCard.SamAV2
         public ISymCryptor AesCryptor { get; set; }
         public ISymCryptor TripleDesCbcCryptor { get; set; }
         public Iso14443ACrcWorker NxpCrc16Worker { get; set; }
+        public ICrcWorker<uint> NxpCrc32Worker { get; set; }
         public ICMacWorker CMacWorker { get; set; }
         public string ApduURL { get; set; }
         private bool chkOK { get; set; }
@@ -473,6 +474,7 @@ namespace SmartCard.SamAV2
             }
             // verify RndA from encSam2
             byte[] encSam2 = response.Data;
+            //authHostDO.Iv = encSam2;
             byte[] encRndAROL2 = this.AesCryptor.Encrypt(this.ByteWorker.RotateLeft(authHostDO.RndA, 2));
             log.Debug(m => m("Ek(Kxe,RndA''):[{0}]", this.HexConverter.Bytes2Hex(encRndAROL2)));
             if (this.ByteWorker.AreEqual(encRndAROL2, encSam2))
@@ -498,6 +500,7 @@ namespace SmartCard.SamAV2
                     authHostDO.Ke = this.AesCryptor.Encrypt(svKe);
                     authHostDO.Km = this.AesCryptor.Encrypt(svKm);
                 }
+                authHostDO.CmdCtr = 0;
                 return true;
             }
             return false;
@@ -534,7 +537,7 @@ namespace SmartCard.SamAV2
                 keyEntryDO.DF_AID,
                 new byte[] { keyEntryDO.DF_KEY_NO, keyEntryDO.CEK_NO, keyEntryDO.CEK_VER, keyEntryDO.KUC },
                 keyEntryDO.SET,
-                new byte[] { keyEntryDO.VerA, keyEntryDO.VerB, keyEntryDO.VerC }
+                new byte[] { keyEntryDO.VerA, keyEntryDO.VerB, keyEntryDO.VerC } //, keyEntryDO.ExtSet }
             );
             //
             byte[] crc16 = this.NxpCrc16Worker.ComputeChecksumBytes(keyEntry);
@@ -545,7 +548,7 @@ namespace SmartCard.SamAV2
             this.TripleDesCbcCryptor.SetIv(this.ByteWorker.Fill(8, 0x00));
             this.TripleDesCbcCryptor.SetKey(authHostDO.Kxe);
             byte[] encrypted = this.TripleDesCbcCryptor.Encrypt(decryped);
-            //
+            
             SequenceParameter sp = new SequenceParameter();
             //
             log.Debug(m => m("SAM_ChangeKeyEntry {0}...", keyEntryDO.KeyNo));
@@ -660,40 +663,217 @@ namespace SmartCard.SamAV2
 
         public bool ChangeKeyEntryAES(KeyEntryDO keyEntryDO, AuthHostDO authHostDO)
         {
-            throw new NotImplementedException();
+            // combine key entry
+            byte[] keyEntry = this.ByteWorker.Combine
+            (
+                keyEntryDO.KeyA,
+                keyEntryDO.KeyB,
+                keyEntryDO.KeyC,
+                keyEntryDO.DF_AID,
+                new byte[] { keyEntryDO.DF_KEY_NO, keyEntryDO.CEK_NO, keyEntryDO.CEK_VER, keyEntryDO.KUC },
+                keyEntryDO.SET,
+                new byte[] { keyEntryDO.VerA, keyEntryDO.VerB, keyEntryDO.VerC, keyEntryDO.ExtSet }
+            );
+            //
+            SequenceParameter sp = new SequenceParameter();
+            //
+            log.Debug(m => m("SAM_ChangeKeyEntry {0}...", keyEntryDO.KeyNo));
+            // KNR="00" PROMAS="00" MSG="000000"
+            sp.Add("KNR", string.Format("{0:X2}", keyEntryDO.KeyNo));
+            sp.Add("PROMAS", "FF");
+            sp.Add("MSG", this.HexConverter.Bytes2Hex(keyEntry));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_ChangeKeyEntry", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0x00 != response.SW2))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
 
         public byte[] AuthenticatePICC_1(AuthPICCDO authPICCDO)
         {
-            throw new NotImplementedException();
+            SequenceParameter sp = new SequenceParameter();
+            //
+            log.Debug(m => m("SAM_AuthenticatePICC_1..."));
+            sp.Add("AUTH_MODE", string.Format("{0:X2}", authPICCDO.AuthMode)); // 0x11
+            byte[] msg = this.ByteWorker.Combine
+            (
+                 new byte[] { authPICCDO.KeyNo, authPICCDO.KeyVer },
+                 authPICCDO.EncRndB,
+                 authPICCDO.DivInput
+                //this.HexConverter.Hex2Bytes("D4D795A6B4B259F2961369F9C608600A"),  // encRndB
+                //this.HexConverter.Hex2Bytes("04322222162980494341534804322222162980494341534804322222162980")
+            );
+            sp.Add("MSG", this.HexConverter.Bytes2Hex(msg));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_AuthenticatePICC_1", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0xAF != response.SW2))
+            {
+                return null;
+            }
+            return response.Data;
         }
         public bool AuthenticatePICC_2(AuthPICCDO authPICCDO)
         {
-            throw new NotImplementedException();
+            SequenceParameter sp = new SequenceParameter();
+            //
+            log.Debug(m => m("SAM_AuthenticatePICC_2..."));
+            sp.Add("MSG", this.HexConverter.Bytes2Hex(authPICCDO.EncRndAROL8));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_AuthenticatePICC_2", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0x00 != response.SW2))
+            {
+                authPICCDO.Kxe = null;
+                return false;
+            }
+            else
+            {
+                response = this.ApduPlayer.ProcessSequence("SAM_DumpSessionKey");
+                if ((0x90 != response.SW1) || (0x00 != response.SW2))
+                {
+                    authPICCDO.Kxe = null;
+                }
+                else
+                {
+                    authPICCDO.Kxe = response.Data;
+                }
+                return true;
+            }
         }
-
-        public byte[] Encrypt(byte keyNo, byte keyVer, byte authMode, byte[] iv, byte[] decrypted)
+        public byte[] Encrypt(byte keyNo, byte keyVer, byte divMode, byte[] iv, byte[] decrypted)
         {
-            throw new NotImplementedException();
+            SequenceParameter sp = new SequenceParameter();
+            // 0x04
+            log.Debug(m => m("SAM_EncipherOffline_Data..."));
+            // SAM_EncipherOffline_Data" CLA="80" DIV_MODE="00" KNR_KVER="3500" IV="0000" MSG="0000"
+            sp.Add("KNR_KVER", string.Format("{0:X2}{1:X2}", keyNo, keyVer));
+            sp.Add("DIV_MODE", string.Format("{0:X2}", divMode ));
+            sp.Add("IV", this.HexConverter.Bytes2Hex(iv));
+            sp.Add("MSG", this.HexConverter.Bytes2Hex(decrypted));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_EncipherOffline_Data", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0x00 != response.SW2))
+            {
+                return null;
+            }
+            return response.Data;
         }
-
 
         public KUCDO GetKUCEntry(byte kUCNo)
         {
-            throw new NotImplementedException();
+            log.Debug(m => m("SAM_GetKUCEntry[{0:X2}]...", kUCNo));
+            SequenceParameter sp = new SequenceParameter();
+            sp.Add("KUCNR", string.Format("{0:X2}", kUCNo));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_GetKUCEntry", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0x00 != response.SW2))
+            {
+                return null;
+            }
+            return new KUCDO
+            {
+                KUCNo = kUCNo,
+                Limit = BitConverter.ToUInt32( response.Data, 0 ),
+                RefKeyNo = response.Data[4],
+                RefKeyVer = response.Data[5],
+                CurVal = BitConverter.ToUInt32( response.Data, 6) 
+            };
         }
-
 
         public bool ApplicationExist(byte[] DfAid)
         {
             throw new NotImplementedException();
         }
 
-
-        public void ChangeKUCEntry(KUCDO kUCDO, byte[] kxe )
+        public void ChangeKUCEntry(KUCDO kUCDO, AuthHostDO authHostDO )
         {
-            throw new NotImplementedException();
+            log.Debug(m => m("SAM_ChangeKUCEntry[{0}]...", kUCDO));
+            SequenceParameter sp = new SequenceParameter();
+            sp.Add("KUCNR", string.Format("{0:X2}", kUCDO.KUCNo));
+            sp.Add("PROMAS", string.Format("{0:X2}", kUCDO.ProMas));
+            // map with promas
+            byte[] msg = new byte[] { };
+            // update limit
+            if (0x80 == (0x80 & kUCDO.ProMas))
+            {
+                msg = this.ByteWorker.Combine(msg, BitConverter.GetBytes(kUCDO.Limit));
+            }
+            // update KeyNoCKUC
+            if (0x40 == (0x40 & kUCDO.ProMas))
+            {
+                msg = this.ByteWorker.Combine(msg, new byte[] { kUCDO.RefKeyNo });
+            }
+            // update KVerCKUC
+            if (0x20 == (0x20 & kUCDO.ProMas))
+            {
+                msg = this.ByteWorker.Combine(msg, new byte[] { kUCDO.RefKeyVer });
+            }
+            // get raw data
+            byte[] decrypted = this.ByteWorker.CMacPadding( msg );
+            log.Debug(m => m("data[{0}]: {1}", decrypted.Length, this.HexConverter.Bytes2Hex(decrypted)));
+            //
+            byte[] cntBytes = authHostDO.CmdCtrBytes; //this.ByteWorker.Reverse(BitConverter.GetBytes( counter++ ));
+            authHostDO.CmdCtr += 1;
+            byte[] ivLoad = this.ByteWorker.Combine
+            (
+                new byte[] { 0x01, 0x01, 0x01, 0x01 },
+                cntBytes, cntBytes, cntBytes
+            );            
+            //
+            this.AesCryptor.SetIv( SymCryptor.ConstZero );
+            this.AesCryptor.SetKey( authHostDO.Ke );
+            byte[] iv = this.AesCryptor.Encrypt(ivLoad);
+            //
+            this.AesCryptor.SetIv(iv);
+            byte[] encrypted = this.AesCryptor.Encrypt(decrypted);
+            // mac data
+            byte[] macData = this.ByteWorker.Combine
+            (
+                new byte[] { 0x80, 0xCC },
+                cntBytes,
+                new byte[] { kUCDO.KUCNo, kUCDO.ProMas },
+                new byte[] { 0x18 },
+                encrypted
+            );
+            this.CMacWorker.SetIv(SymCryptor.ConstZero);
+            this.CMacWorker.SetMacKey(authHostDO.Km);
+            this.CMacWorker.DataInput(macData);
+            byte[] mac = this.CMacWorker.GetOdd();
+            //
+            byte[] msgFull = this.ByteWorker.Combine(encrypted, mac);
+            sp.Add("MSG", this.HexConverter.Bytes2Hex(msgFull));
+            APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_ChangeKUCEntry", sp);
+            log.Debug(m => m("RAPDU:[{0}]", response));
+            //
+            if ((0x90 != response.SW1) || (0x00 != response.SW2))
+            {
+                string errMsg = string.Format("SAM_ChangeKUCEntry Error: {0:X2}{1:X2}", response.SW1, response.SW2);
+                log.Error(m => m("{0}", errMsg));
+                throw new Exception(errMsg);
+            }
+            else  // verify mac
+            {               
+                cntBytes = authHostDO.CmdCtrBytes;
+                authHostDO.CmdCtr += 1;
+                macData = this.ByteWorker.Combine( new byte[] { response.SW1, response.SW2 }, cntBytes );
+                this.CMacWorker.DataInput(macData);
+                if( !this.ByteWorker.AreEqual(  response.Data, this.CMacWorker.GetOdd() ))
+                {
+                    string errMsg = string.Format("SAM_ChangeKUCEntry Mac Error..." );
+                    log.Error(m => m("{0}", errMsg));
+                    throw new Exception(errMsg);
+                }
+            }
         }
 
 
@@ -828,7 +1008,31 @@ namespace SmartCard.SamAV2
 
         public bool IsAV2Mode()
         {
-            throw new NotImplementedException();
+            byte[] result = this.GetVersion();
+            byte lastByte = result[ result.Length - 1 ];
+            if( 0xA2 == lastByte )
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public bool KillAuthentication( AuthHostDO authHostDO )
+        {
+            if (null == authHostDO)
+            {
+                APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_KillAuthentication");
+                if ((0x90 != response.SW1) || (0x00 != response.SW2))
+                {
+                    return false;
+                }
+                return true;
+            }
+            else  // full encryption
+            {
+
+            }
         }
     }
 }

@@ -520,8 +520,7 @@ namespace SmartCard.SamAV2
 
         public KUCDO GetKUCEntry(byte kUCNo)
         {
-            // 
-            log.Debug(m => m("SAM_GetKUCEntry[{0}]...", kUCNo));
+            log.Debug(m => m("SAM_GetKUCEntry[{0:X2}]...", kUCNo));
             SequenceParameter sp = new SequenceParameter();
             sp.Add("KUCNR", string.Format("{0:X2}", kUCNo));
             APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_GetKUCEntry", sp);
@@ -557,7 +556,7 @@ namespace SmartCard.SamAV2
             return true;
         }
 
-        public void ChangeKUCEntry( KUCDO kUCDO, byte[] kxe )
+        public void ChangeKUCEntry( KUCDO kUCDO, AuthHostDO authHostDO )
         {
             log.Debug(m => m("SAM_ChangeKUCEntry[{0}]...", kUCDO));
             SequenceParameter sp = new SequenceParameter();
@@ -583,10 +582,11 @@ namespace SmartCard.SamAV2
             byte[] crc16 = this.NxpCrc16Worker.ComputeChecksumBytes(msg);
             msg = this.ByteWorker.Combine(msg, crc16);
             log.Debug(m => m("data[{0}]: {1}", msg.Length, this.HexConverter.Bytes2Hex(msg)));
-            byte[] decryped = this.ByteWorker.ZeroPadding( msg, 8, false ); 
+            byte[] decrypted = this.ByteWorker.ZeroPadding( msg, 8, false );
+            log.Debug(m => m("{0}", this.HexConverter.Bytes2Hex(decrypted)));
             this.TripleDesCbcCryptor.SetIv(this.ByteWorker.Fill(8, 0x00));
-            this.TripleDesCbcCryptor.SetKey(kxe);
-            byte[] encrypted = this.TripleDesCbcCryptor.Encrypt(msg);
+            this.TripleDesCbcCryptor.SetKey( authHostDO.Kxe );
+            byte[] encrypted = this.TripleDesCbcCryptor.Encrypt(decrypted);
             sp.Add("MSG", this.HexConverter.Bytes2Hex( encrypted ) );
             APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_ChangeKUCEntry", sp);
             log.Debug(m => m("RAPDU:[{0}]", response));
@@ -634,6 +634,18 @@ namespace SmartCard.SamAV2
 
 
         public bool IsAV2Mode()
+        {
+            byte[] result = this.GetVersion();
+            byte lastByte = result[result.Length - 1];
+            if (0xA2 == lastByte)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public bool KillAuthentication( AuthHostDO authHostDO )
         {
             throw new NotImplementedException();
         }

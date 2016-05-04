@@ -115,7 +115,7 @@ namespace SmartCard.SamAV2
         byte[] Encrypt(byte keyNo, byte keyVer, byte authMode, byte[] iv, byte[] decrypted);
 
         KUCDO GetKUCEntry(byte kUCNo);
-        void ChangeKUCEntry(KUCDO kUCDO, byte[] kxe);
+        void ChangeKUCEntry(KUCDO kUCDO,  AuthHostDO authHostDO );
 
         bool ApplicationExist(byte[] DfAId);
 
@@ -124,5 +124,6 @@ namespace SmartCard.SamAV2
         bool Switch2AV2Mode( byte[] keyData, byte keyVer, AuthHostDO authHostDO );
 
         bool IsAV2Mode();
+        bool KillAuthentication( AuthHostDO authHostDO );
     }
 }

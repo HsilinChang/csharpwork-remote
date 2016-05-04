@@ -362,7 +362,7 @@ namespace SmartCard.SamAV2.UnitTest
             KeyInfo defaultMaster = this.dicKeyInfo["usageKeyDefault"];
             AuthHostDO authHostDO = new AuthHostDO();
             Assert.True( this.samAV2Manager.AuthenticateHost(defaultMaster.KeyData, defaultMaster.KeyNo, defaultMaster.KeyVer, 0x00, authHostDO) );
-            this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO.Kxe);
+            this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO);
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug( m => m( "After Change: {0}", kUCDO ));
 
@@ -383,7 +383,8 @@ namespace SmartCard.SamAV2.UnitTest
             KeyInfo defaultMaster = this.dicKeyInfo["usageKeyDefault"];
             AuthHostDO authHostDO = new AuthHostDO();
             Assert.True(this.samAV2Manager.AuthenticateHost(defaultMaster.KeyData, defaultMaster.KeyNo, defaultMaster.KeyVer, 0x00, authHostDO));
-            this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO.Kxe);
+            log.Debug(m => m("{0}", authHostDO));
+            this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO);
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug(m => m("After Change: {0}", kUCDO));
 
