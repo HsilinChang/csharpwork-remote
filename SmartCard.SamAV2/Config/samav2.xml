@@ -26,6 +26,7 @@
     <property name="CMacWorker" ref="aes128CMacWorker"/>
     <property name="ApduURL" value="SmartCard.SamAV2.Config.SamAv2CmdList.xml"/>
     <property name="NxpCrc16Worker" ref="nxpCrc16Worker"/>
+    <property name="NxpCrc32Worker" ref="nxpCrc32Worker"/>
   </object>
   <!-- MkSessionManager -->
   <object id="mkSessionManager" type="SmartCard.SamAV2.MkSessionManager, SmartCard.SamAV2" >
