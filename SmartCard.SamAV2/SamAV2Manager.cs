@@ -1074,5 +1074,96 @@ namespace SmartCard.SamAV2
                 }
             }
         }
+
+
+        public KUCDO GetKUCEntry(byte kUCNo, AuthHostDO authHostDO)
+        {
+            SequenceParameter sp = new SequenceParameter();
+            APDUResponse response = null;
+            //
+            log.Debug(m => m("SAM_GetKUCEntry: 0x{0:X2}...", kUCNo));
+            sp.Add("KUCNR", string.Format("{0:X2}", kUCNo));
+
+            if (null == authHostDO)
+            {
+                log.Debug(m => m("SAM_GetKUCEntry[{0:X2}]...", kUCNo));
+                response = this.ApduPlayer.ProcessSequence("SAM_GetKUCEntry", sp);
+                log.Debug(m => m("RAPDU:[{0}]", response));
+                //
+                if ((0x90 != response.SW1) || (0x00 != response.SW2))
+                {
+                    return null;
+                }
+                return new KUCDO
+                {
+                    KUCNo = kUCNo,
+                    Limit = BitConverter.ToUInt32(response.Data, 0),
+                    RefKeyNo = response.Data[4],
+                    RefKeyVer = response.Data[5],
+                    CurVal = BitConverter.ToUInt32(response.Data, 6)
+                };
+            }
+            else
+            {
+                byte[] cntBytes = authHostDO.CmdCtrBytes;
+                byte[] macData = this.ByteWorker.Combine
+                (
+                     new byte[] { 0x80, 0x6C}, cntBytes, new byte[] { kUCNo, 0x00, 0x08, 0x00 }
+                );
+                log.Debug(m => m("{0}", this.HexConverter.Bytes2Hex(macData)));
+                this.CMacWorker.SetIv(SymCryptor.ConstZero);
+                this.CMacWorker.SetMacKey(authHostDO.Km);
+                this.CMacWorker.DataInput(macData);
+                byte[] mac = this.CMacWorker.GetOdd();
+                //
+                //SequenceParameter sp = new SequenceParameter();
+                sp.Add("MSG", this.HexConverter.Bytes2Hex(mac));
+                response = this.ApduPlayer.ProcessSequence("SAM_GetKUCEntry", sp);
+                log.Debug(m => m("RAPDU:[{0}]", response));
+                //
+                if ((0x90 != response.SW1) || (0x00 != response.SW2))
+                {
+                    string errMsg = string.Format("SAM_GetKUCEntry Error: {0:X2}{1:X2}", response.SW1, response.SW2);
+                    log.Error(m => m("{0}", errMsg));
+                    throw new Exception(errMsg);
+                }
+                else  // decrypt data and verify mac
+                {
+                    authHostDO.CmdCtr += 1;
+                    cntBytes = authHostDO.CmdCtrBytes;  // one command response +1
+                    //
+                    byte[] ivLoad = this.ByteWorker.Combine
+                    (
+                        new byte[] { 0x02, 0x02, 0x02, 0x02 },
+                        cntBytes, cntBytes, cntBytes
+                    );
+                    //
+                    this.AesCryptor.SetIv(SymCryptor.ConstZero);
+                    this.AesCryptor.SetKey(authHostDO.Ke);
+                    byte[] iv = this.AesCryptor.Encrypt(ivLoad);
+                    //
+                    this.AesCryptor.SetIv(iv);
+                    byte[] decrypted = this.AesCryptor.Decrypt( this.ByteWorker.SubArray( response.Data, 0,16 ) );
+                    log.Debug(m => m("{0}", this.HexConverter.Bytes2Hex(decrypted)));
+                    //
+                    macData = this.ByteWorker.Combine(new byte[] { response.SW1, response.SW2 }, cntBytes, this.ByteWorker.SubArray( response.Data, 0, 16 ) );
+                    this.CMacWorker.DataInput(macData);
+                    if (!this.ByteWorker.AreEqual( this.ByteWorker.SubArray( response.Data, 16, 8 ), this.CMacWorker.GetOdd()))
+                    {
+                        string errMsg = string.Format("SAM_GetKUCEntry Mac Error...");
+                        log.Error(m => m("{0}", errMsg));
+                        throw new Exception(errMsg);
+                    }
+                    return new KUCDO
+                    {
+                        KUCNo = kUCNo,
+                        Limit = BitConverter.ToUInt32(decrypted, 0),
+                        RefKeyNo = decrypted[4],
+                        RefKeyVer = decrypted[5],
+                        CurVal = BitConverter.ToUInt32(decrypted, 6)
+                    };
+                }
+            }
+        }
     }
 }

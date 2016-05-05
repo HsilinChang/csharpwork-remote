@@ -114,6 +114,7 @@ namespace SmartCard.SamAV2
         bool AuthenticatePICC_2( AuthPICCDO authPICCDO );
         byte[] Encrypt(byte keyNo, byte keyVer, byte authMode, byte[] iv, byte[] decrypted);
 
+        KUCDO GetKUCEntry(byte kUCNo, AuthHostDO authHostDO);
         KUCDO GetKUCEntry(byte kUCNo);
         void ChangeKUCEntry(KUCDO kUCDO,  AuthHostDO authHostDO );
 

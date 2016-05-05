@@ -649,5 +649,11 @@ namespace SmartCard.SamAV2
         {
             throw new NotImplementedException();
         }
+
+
+        public KUCDO GetKUCEntry(byte kUCNo, AuthHostDO authHostDO)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

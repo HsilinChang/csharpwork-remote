@@ -5,7 +5,7 @@
     <Apdu Name="SAM_Unlock" Class="80" Ins="10" P1="00" P2="00" Data="0000" Le="00" />
     <Apdu Name="SAM_AuthenticateHost" Class="80" Ins="A4" P1="00" P2="00" Data="000000" Le="00" />
     <Apdu Name="SAM_ChangeKeyEntry" Class="80" Ins="C1" P1="00" P2="FF" Data="000000" />
-    <Apdu Name="SAM_GetKeyEntry" Class="80" Ins="64" P1="00" P2="00" Le="00" />
+    <Apdu Name="SAM_GetKeyEntry" Class="80" Ins="64" P1="00" P2="00" Data="" Le="00" />
     <Apdu Name="SAM_AuthenticatePICC_1" Class="80" Ins="0A" P1="11" P2="00" Data="000000" Le="00"/>
     <Apdu Name="SAM_AuthenticatePICC_2" Class="80" Ins="0A" P1="00" P2="00" Data="000000"/>
     <Apdu Name="SAM_DumpSessionKey" Class="80" Ins="D5" P1="00" P2="00" Le="00"/>
@@ -60,8 +60,8 @@
       <Command Apdu="SAM_LoadInitVector" Class="CLA" Data="IV"/>
       <Command Apdu="SAM_Encipher_Data"  Class="CLA" P1="LFI" P2="OFFSET" Data="MSG"/>
     </Sequence>
-    <Sequence Name="SAM_GetKUCEntry" CLA="80" KUCNR="01">
-      <Command Apdu="SAM_GetKUCEntry" Class="CLA" P1="KUCNR"/>
+    <Sequence Name="SAM_GetKUCEntry" CLA="80" KUCNR="01" MSG="0000">
+      <Command Apdu="SAM_GetKUCEntry" Class="CLA" P1="KUCNR" Data="MSG"/>
     </Sequence>
     <Sequence Name="SAM_ChangeKUCEntry" CLA="80" KUCNR="01" PROMAS="FF" MSG="00000000">
       <Command Apdu="SAM_ChangeKUCEntry" Class="CLA" P1="KUCNR" P2="PROMAS" Data="MSG"/>
