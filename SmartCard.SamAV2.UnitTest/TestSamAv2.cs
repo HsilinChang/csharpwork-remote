@@ -739,6 +739,7 @@ namespace SmartCard.SamAV2.UnitTest
             this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO );
             //
             //Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
+            //authHostDO.CmdCtr = 0x01;
             Assert.True(this.samAV2Manager.KillAuthentication( authHostDO ));
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug(m => m("After Change: {0}", kUCDO));
@@ -764,8 +765,8 @@ namespace SmartCard.SamAV2.UnitTest
             this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO);
             //
             //Assert.True(this.samAV2Manager.KillAuthentication( authHostDO ));
-            Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
-            Assert.True(this.samAV2Manager.KillAuthentication( null ));
+            //Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
+            Assert.True(this.samAV2Manager.KillAuthentication( authHostDO ));
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug(m => m("After Change: {0}", kUCDO));
 
@@ -816,7 +817,18 @@ namespace SmartCard.SamAV2.UnitTest
         {
             Assert.True(this.samAV2Manager.IsAV2Mode());
         }
-        
+
+        [Test]
+        public void Test99KillAuthentication()
+        {
+            byte keyNo = 0x00;
+            byte keyVer = 0x00;
+            byte[] keyData = this.getDivKeyIcash("seedMasterKey", 0x00);
+            AuthHostDO authHostDO = new AuthHostDO();
+            Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x02, authHostDO));
+            log.Debug(m => m("{0}", authHostDO));
+            Assert.True(this.samAV2Manager.KillAuthentication(authHostDO));
+        }
 
         [TearDown]
         public void TearDown()

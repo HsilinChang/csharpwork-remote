@@ -823,7 +823,7 @@ namespace SmartCard.SamAV2
             log.Debug(m => m("data[{0}]: {1}", decrypted.Length, this.HexConverter.Bytes2Hex(decrypted)));
             //
             byte[] cntBytes = authHostDO.CmdCtrBytes; //this.ByteWorker.Reverse(BitConverter.GetBytes( counter++ ));
-            authHostDO.CmdCtr += 1;
+            //authHostDO.CmdCtr += 1;
             byte[] ivLoad = this.ByteWorker.Combine
             (
                 new byte[] { 0x01, 0x01, 0x01, 0x01 },
@@ -862,9 +862,10 @@ namespace SmartCard.SamAV2
                 throw new Exception(errMsg);
             }
             else  // verify mac
-            {               
-                cntBytes = authHostDO.CmdCtrBytes;
+            {
                 authHostDO.CmdCtr += 1;
+                cntBytes = authHostDO.CmdCtrBytes;  // one command response +1
+                //
                 macData = this.ByteWorker.Combine( new byte[] { response.SW1, response.SW2 }, cntBytes );
                 this.CMacWorker.DataInput(macData);
                 if( !this.ByteWorker.AreEqual(  response.Data, this.CMacWorker.GetOdd() ))
@@ -1034,7 +1035,7 @@ namespace SmartCard.SamAV2
             else  // full encryption
             {
                 byte[] cntBytes = authHostDO.CmdCtrBytes;
-                authHostDO.CmdCtr += 1;
+                //authHostDO.CmdCtr += 1;
                 byte[] macData = this.ByteWorker.Combine
                 (
                      new byte[] { 0x80, 0xCA }, cntBytes, new byte[] { 0x00, 0x00, 0x08 }
@@ -1056,7 +1057,21 @@ namespace SmartCard.SamAV2
                     log.Error(m => m("{0}", errMsg));
                     throw new Exception(errMsg);
                 }
-                return true;
+                else  // verify mac
+                {
+                    authHostDO.CmdCtr += 1;
+                    cntBytes = authHostDO.CmdCtrBytes;  // one command response +1
+                    //
+                    macData = this.ByteWorker.Combine(new byte[] { response.SW1, response.SW2 }, cntBytes);
+                    this.CMacWorker.DataInput(macData);
+                    if (!this.ByteWorker.AreEqual(response.Data, this.CMacWorker.GetOdd()))
+                    {
+                        string errMsg = string.Format("SAM_KillAuthentication Mac Error...");
+                        log.Error(m => m("{0}", errMsg));
+                        throw new Exception(errMsg);
+                    }
+                    return true;
+                }
             }
         }
     }
