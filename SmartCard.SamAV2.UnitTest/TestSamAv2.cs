@@ -738,8 +738,8 @@ namespace SmartCard.SamAV2.UnitTest
             log.Debug(m => m("{0}", authHostDO));
             this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO );
             //
-            Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
-            Assert.True(this.samAV2Manager.KillAuthentication());
+            //Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
+            Assert.True(this.samAV2Manager.KillAuthentication( authHostDO ));
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug(m => m("After Change: {0}", kUCDO));
         }
@@ -763,8 +763,9 @@ namespace SmartCard.SamAV2.UnitTest
             log.Debug(m => m("{0}", authHostDO));
             this.samAV2Manager.ChangeKUCEntry(kUCDO, authHostDO);
             //
-            //Assert.True(this.samAV2Manager.KillAuthentication());
+            //Assert.True(this.samAV2Manager.KillAuthentication( authHostDO ));
             Assert.True(this.samAV2Manager.AuthenticateHost(keyData, keyNo, keyVer, 0x00, authHostDO));
+            Assert.True(this.samAV2Manager.KillAuthentication( null ));
             kUCDO = this.samAV2Manager.GetKUCEntry(0x01);
             log.Debug(m => m("After Change: {0}", kUCDO));
 

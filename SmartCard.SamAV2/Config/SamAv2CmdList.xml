@@ -16,7 +16,7 @@
     <Apdu Name="SAM_SelectApplication" Class="80" Ins="5A" P1="00" P2="00" Data="000000"/>
     <Apdu Name="SAM_ActivateOfflineKey" Class="80" Ins="01" P1="00" P2="00" Data="000000"/>
     <Apdu Name="SAM_EncipherOffline_Data" Class="80" Ins="0E" P1="00" P2="00" Data="0000" Le="00"/>
-    <Apdu Name="SAM_KillAuthentication" Class="80" Ins="CA" P1="00" P2="00" />
+    <Apdu Name="SAM_KillAuthentication" Class="80" Ins="CA" P1="00" P2="00" Data="0000" />
   </ApduList>
   <SequenceList>
     <Sequence Name="SAM_GetVersion" CLA="80" >
@@ -74,8 +74,8 @@
       <Command Apdu="SAM_LoadInitVector" Class="CLA" Data="IV"/>
       <Command Apdu="SAM_EncipherOffline_Data"  Class="CLA" Data="MSG"/>
     </Sequence>
-    <Sequence Name="SAM_KillAuthentication" CLA="80" >
-      <Command Apdu="SAM_KillAuthentication" Class="CLA"/>
+    <Sequence Name="SAM_KillAuthentication" CLA="80" MSG="" >
+      <Command Apdu="SAM_KillAuthentication" Class="CLA" Data="MSG"/>
     </Sequence>
   </SequenceList>
 </CommandList>

@@ -1020,9 +1020,11 @@ namespace SmartCard.SamAV2
 
         public bool KillAuthentication( AuthHostDO authHostDO )
         {
+            APDUResponse response = null;
+            //
             if (null == authHostDO)
             {
-                APDUResponse response = this.ApduPlayer.ProcessSequence("SAM_KillAuthentication");
+                response = this.ApduPlayer.ProcessSequence("SAM_KillAuthentication");
                 if ((0x90 != response.SW1) || (0x00 != response.SW2))
                 {
                     return false;
@@ -1031,7 +1033,30 @@ namespace SmartCard.SamAV2
             }
             else  // full encryption
             {
-
+                byte[] cntBytes = authHostDO.CmdCtrBytes;
+                authHostDO.CmdCtr += 1;
+                byte[] macData = this.ByteWorker.Combine
+                (
+                     new byte[] { 0x80, 0xCA }, cntBytes, new byte[] { 0x00, 0x00, 0x08 }
+                );
+                log.Debug(m => m("{0}", this.HexConverter.Bytes2Hex(macData)));
+                this.CMacWorker.SetIv(SymCryptor.ConstZero);
+                this.CMacWorker.SetMacKey(authHostDO.Km);
+                this.CMacWorker.DataInput(macData);
+                byte[] mac = this.CMacWorker.GetOdd();
+                //
+                SequenceParameter sp = new SequenceParameter();
+                sp.Add("MSG", this.HexConverter.Bytes2Hex( mac ));
+                response = this.ApduPlayer.ProcessSequence( "SAM_KillAuthentication", sp );
+                log.Debug(m => m("RAPDU:[{0}]", response));
+                //
+                if ((0x90 != response.SW1) || (0x00 != response.SW2))
+                {
+                    string errMsg = string.Format("SAM_KillAuthentication Error: {0:X2}{1:X2}", response.SW1, response.SW2);
+                    log.Error(m => m("{0}", errMsg));
+                    throw new Exception(errMsg);
+                }
+                return true;
             }
         }
     }
