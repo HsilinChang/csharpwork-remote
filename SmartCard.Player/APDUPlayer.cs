@@ -82,15 +82,17 @@ namespace SmartCard.Player
 
 			try
 			{
-				// Load the document
-				apduDoc.Load(apduFileName);
+                using( Stream st = new FileStream(apduFileName, FileMode.Open, FileAccess.Read ) )
+                {
+                    // Load the document
+                    apduDoc.Load(st);
 
-				// Get the list of APDUs
-				this.m_xmlApduList = apduDoc.GetElementsByTagName( xmlNodeApdu );	
+                    // Get the list of APDUs
+                    this.m_xmlApduList = apduDoc.GetElementsByTagName(xmlNodeApdu);
 
-                // Get the list of sequences
-                this.m_xmlSequenceList = apduDoc.GetElementsByTagName( xmlNodeSequence );
-
+                    // Get the list of sequences
+                    this.m_xmlSequenceList = apduDoc.GetElementsByTagName(xmlNodeSequence);
+                }
 				this.CardNative = iCard;
 			}
 			catch
@@ -147,11 +149,14 @@ namespace SmartCard.Player
 
             try
             {
-                // Load the document
-                apduDoc.Load(fileName);
+                using (Stream st = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    // Load the document
+                    apduDoc.Load(st);
 
-                // Get the list of sequences
-                this.m_xmlApduList = apduDoc.GetElementsByTagName( xmlNodeApdu );
+                    // Get the list of sequences
+                    this.m_xmlApduList = apduDoc.GetElementsByTagName(xmlNodeApdu);
+                }
             }
             catch
             {
@@ -192,11 +197,14 @@ namespace SmartCard.Player
 
             try
             {
-                // Load the document
-                apduDoc.Load(fileName);
+                using (Stream st = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    // Load the document
+                    apduDoc.Load(st);
 
-                // Get the list of sequences
-                this.m_xmlSequenceList = apduDoc.GetElementsByTagName(xmlNodeSequence);
+                    // Get the list of sequences
+                    this.m_xmlSequenceList = apduDoc.GetElementsByTagName(xmlNodeSequence);
+                }
             }
             catch
             {
@@ -228,12 +236,15 @@ namespace SmartCard.Player
 
             try
             {
-                // Load the document
-                apduDoc.Load(fileName);
+                using (Stream st = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    // Load the document
+                    apduDoc.Load(st);
 
-                // Get the list of sequences
-                this.m_xmlApduList = apduDoc.GetElementsByTagName(xmlNodeApdu);
-                this.m_xmlSequenceList = apduDoc.GetElementsByTagName(xmlNodeSequence);
+                    // Get the list of sequences
+                    this.m_xmlApduList = apduDoc.GetElementsByTagName(xmlNodeApdu);
+                    this.m_xmlSequenceList = apduDoc.GetElementsByTagName(xmlNodeSequence);
+                }
             }
             catch
             {
@@ -385,7 +396,7 @@ namespace SmartCard.Player
                 for (int nI = 0; nI < this.m_xmlApduList.Count; nI++)
                 {
                     XmlNode apdu = this.m_xmlApduList.Item(nI);
-
+                    // attribute Name
                     string sName = apdu.Attributes[xmlAttrName].Value;
                     if (sName == apduName)
                     {
@@ -496,7 +507,9 @@ namespace SmartCard.Player
                 {
                     bLe = new byte[nLen];
                     for (int nJ = 0; nJ < nLen; nJ++)
+                    {
                         bLe[nJ] = byte.Parse(sLe.Substring(nJ * 2, 2), NumberStyles.AllowHexSpecifier);
+                    }
                 }
             }
             int nId = 0;
@@ -572,11 +585,7 @@ namespace SmartCard.Player
             }
             else if (sP3 != "")
             {
-                bP3 = byte.Parse(sP3, NumberStyles.AllowHexSpecifier);
-                //if (sData.Length == 0)
-                //{
-                //    bLe = bP3;
-                //}
+                bP3 = byte.Parse(sP3, NumberStyles.AllowHexSpecifier);                
             }
 
             byte[] baData = null;
@@ -584,8 +593,9 @@ namespace SmartCard.Player
             {
                 baData = new byte[bP3];
                 for (int nJ = 0; nJ < sData.Length; nJ += 2)
+                {
                     baData[nJ / 2] = byte.Parse(sData.Substring(nJ, 2), NumberStyles.AllowHexSpecifier);
-                //bLe = 0;
+                }                
             }
             
             return new APDUCommand(bClass, bIns, bP1, bP2, baData, bLe);
@@ -602,8 +612,8 @@ namespace SmartCard.Player
             byte bLe = 0;
 
             // Send the command
-            m_apduResp = this.CardNative.Transmit(apduCmd);
-            AddLog(new APDULog(apduCmd, m_apduResp));
+            this.m_apduResp = this.CardNative.Transmit(apduCmd);
+            this.AddLog(new APDULog( apduCmd, this.m_apduResp));
 
             // Check if SW2 can be used as Le for the next call
             if (m_apduResp.SW1 == 0x9F)
@@ -720,7 +730,7 @@ namespace SmartCard.Player
         /// <param name="xmlAttrs">List of parameters of the APDU</param>
         /// <param name="seqParam">List of parameters of the sequence</param>
         /// <returns>APDUParam object</returns>
-//        private APDUParam BuildCommandParam(XmlAttributeCollection xmlAttrs, Dictionary<string, string> seqParam)
+        // private APDUParam BuildCommandParam(XmlAttributeCollection xmlAttrs, Dictionary<string, string> seqParam)
         private APDUParam BuildCommandParam(XmlAttributeCollection xmlAttrs, SequenceParameter seqParam)
         {
             APDUParam apduParam = null;
@@ -852,8 +862,6 @@ namespace SmartCard.Player
                         break;
                     }
                 }
-
-               
             }
 
             return apduParam;
