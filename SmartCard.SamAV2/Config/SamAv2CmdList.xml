@@ -60,7 +60,7 @@
       <Command Apdu="SAM_LoadInitVector" Class="CLA" Data="IV"/>
       <Command Apdu="SAM_Encipher_Data"  Class="CLA" P1="LFI" P2="OFFSET" Data="MSG"/>
     </Sequence>
-    <Sequence Name="SAM_GetKUCEntry" CLA="80" KUCNR="01" MSG="0000">
+    <Sequence Name="SAM_GetKUCEntry" CLA="80" KUCNR="01" MSG="">
       <Command Apdu="SAM_GetKUCEntry" Class="CLA" P1="KUCNR" Data="MSG"/>
     </Sequence>
     <Sequence Name="SAM_ChangeKUCEntry" CLA="80" KUCNR="01" PROMAS="FF" MSG="00000000">
