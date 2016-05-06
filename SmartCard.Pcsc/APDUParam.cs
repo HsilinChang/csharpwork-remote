@@ -16,12 +16,12 @@ namespace SmartCard.Pcsc
             m_bP1 = 0;
         byte[] m_baData = null;
         byte[] m_nLe = null;
-        bool 
-            m_fUseP1 = false,
-            m_fUseP2 = false,
-            m_fChannel = false,
-            m_fData = false,
+        bool
             m_fClass = false,
+            m_fChannel = false,
+            m_fUseP1 = false,
+            m_fUseP2 = false,            
+            m_fData = false,            
             m_fLe = false;
 
         #region Constructors
@@ -34,30 +34,39 @@ namespace SmartCard.Pcsc
         /// </summary>
         /// <param name="param"></param>
         public APDUParam( APDUParam param )
-        {
-            // Copy field
+        {  
+            this.m_bClass = param.m_bClass;
+            this.m_bChannel = param.m_bChannel;
+            this.m_bP1 = param.m_bP1;
+            this.m_bP2 = param.m_bP2;
+            // Copy data
             if (null != param.m_baData)
             {
                 this.m_baData = new byte[param.m_baData.Length];
-                param.m_baData.CopyTo( this.m_baData, 0 );
+                param.m_baData.CopyTo(this.m_baData, 0);
             }
             else
             {
                 this.m_baData = null;
             }
-            this.m_bClass = param.m_bClass;
-            this.m_bChannel = param.m_bChannel;
-            this.m_bP1 = param.m_bP1;
-            this.m_bP2 = param.m_bP2;
-            this.m_nLe = param.m_nLe;
+            //copy le
+            if( null != param.m_nLe )
+            {
+                this.m_nLe = new byte[param.m_nLe.Length];
+                param.m_nLe.CopyTo(this.m_nLe, 0);
+            }
+            else
+            {
+                this.m_nLe = null;
+            }
 
-            // Copy flags field
-            this.m_fChannel = param.m_fChannel;
+            // Copy flags field            
             this.m_fClass = param.m_fClass;
-            this.m_fData = param.m_fData;
-            this.m_fLe = param.m_fLe;
+            this.m_fChannel = param.m_fChannel;
             this.m_fUseP1 = param.m_fUseP1;
             this.m_fUseP2 = param.m_fUseP2;
+            this.m_fData = param.m_fData;
+            this.m_fLe = param.m_fLe;
         }
 
         public APDUParam( byte bClass, byte bP1, byte bP2, byte[] baData, byte[] bLe )
@@ -67,6 +76,16 @@ namespace SmartCard.Pcsc
             this.P2 = bP2;
             this.Data = baData;
             this.Le = bLe;
+        }
+
+        public APDUParam( byte cla, byte ins, byte p1, byte p2, byte[] baData, byte[] baLe)
+        {
+            this.Class = cla;
+            this.Channel = ins;
+            this.P1 = p1;
+            this.P2 = p2;
+            this.Data = baData;
+            this.Le = baLe;
         }
         #endregion
 
@@ -91,11 +110,11 @@ namespace SmartCard.Pcsc
             this.m_baData = null;
             this.m_nLe = null;
             //
-            this.m_fUseP1 = false;
-            this.m_fUseP2 = false;
-            this.m_fChannel = false;
-            this.m_fData = false;
             this.m_fClass = false;
+            this.m_fChannel = false;
+            this.m_fUseP1 = false;
+            this.m_fUseP2 = false;            
+            this.m_fData = false;            
             this.m_fLe = false;
         }
 
@@ -132,6 +151,9 @@ namespace SmartCard.Pcsc
         #endregion
 
         #region Parameter properties
+        /// <summary>
+        /// P1
+        /// </summary>
         public byte P1
         {
             get { return this.m_bP1; }
@@ -143,6 +165,9 @@ namespace SmartCard.Pcsc
             }
         }
 
+        /// <summary>
+        /// P2
+        /// </summary>
         public byte P2
         {
             get { return this.m_bP2; }
@@ -153,6 +178,9 @@ namespace SmartCard.Pcsc
             }
         }
 
+        /// <summary>
+        /// Data
+        /// </summary>
         public byte[] Data
         {
             get { return this.m_baData; }
@@ -172,6 +200,9 @@ namespace SmartCard.Pcsc
             }
         }
 
+        /// <summary>
+        /// Le, with byte[]
+        /// </summary>
         public byte[] Le
         {
             get { return this.m_nLe; }
@@ -192,6 +223,9 @@ namespace SmartCard.Pcsc
             }
         }
 
+        /// <summary>
+        /// INS
+        /// </summary>
         public byte Channel
         {
             get { return this.m_bChannel; }
@@ -202,6 +236,9 @@ namespace SmartCard.Pcsc
             }
         }
 
+        /// <summary>
+        /// CLA
+        /// </summary>
         public byte Class
         {
             get { return this.m_bClass; }

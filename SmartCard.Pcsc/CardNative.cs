@@ -503,7 +503,7 @@ namespace SmartCard.Pcsc
 			else
 			{
                 apduBuffer = new byte[ APDUCommand.APDU_MIN_LENGTH + 1 + apduCmd.Data.Length + leSize ];
-                apduBuffer[ APDUCommand.APDU_MIN_LENGTH ] = (byte)apduCmd.Data.Length;
+                apduBuffer[ APDUCommand.APDU_MIN_LENGTH ] = (byte)apduCmd.Data.Length; // Lc
                 for (int nI = 0; nI < apduCmd.Data.Length; nI++)
                 {
                     apduBuffer[APDUCommand.APDU_MIN_LENGTH + 1 + nI] = apduCmd.Data[nI];
@@ -536,7 +536,16 @@ namespace SmartCard.Pcsc
             GCHandle gchApduResponse = GCHandle.Alloc( apduResponse, GCHandleType.Pinned);
             IntPtr pApduResponse = Marshal.UnsafeAddrOfPinnedArrayElement( apduResponse, 0 );
             //
-            m_nLastError = SCardTransmit( this.m_hCard, ref ioRequest, pApduBuffer, (uint)apduBuffer.Length, IntPtr.Zero, pApduResponse, out RecvLength );
+            m_nLastError = SCardTransmit
+            ( 
+                this.m_hCard,
+                ref ioRequest,
+                pApduBuffer,
+                (uint)apduBuffer.Length,
+                IntPtr.Zero, 
+                pApduResponse, 
+                out RecvLength 
+            );
             //log.Debug( m => m( "RAPDU Length: {0}", RecvLength ) );
 
             if (m_nLastError != 0)
@@ -547,16 +556,16 @@ namespace SmartCard.Pcsc
                 throw new Exception(msg);
             }
             
-			byte[] apduData = new byte[RecvLength];
+			byte[] apduResponseData = new byte[RecvLength];
 
             for (int nI = 0; nI < RecvLength; nI++)
             {
-                apduData[nI] = apduResponse[nI];
+                apduResponseData[nI] = apduResponse[nI];
             }
             //log.Debug( m => m( "RAPDU:[{0}]", this.HexConverter.Bytes2Hex(apduData) ) );
             gchApduBuffer.Free();
             gchApduResponse.Free();
-			return new APDUResponse( apduData );
+			return new APDUResponse( apduResponseData );
 		}
 
 

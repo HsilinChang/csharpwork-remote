@@ -38,14 +38,14 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug( m => m( "No reader exists!" ) );
             }
             else
             {
-                log.Debug("List Available readers...");
+                log.Debug( m => m( "List Available readers..."));
                 foreach (string reader in readers)
                 {
-                    log.Debug(reader);
+                    log.Debug( m => m( "{0}", reader) );
                 }
             }
         }
@@ -56,7 +56,7 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug(m => m("No reader exists!"));
                 return;
             }
             //
@@ -66,11 +66,11 @@ namespace SmartCard.Pcsc.UnitTest
                 try
                 {
                     cad = ctx["cardNative"] as ICard;
-                    log.Debug("Connect reader:[" + reader + "]....");
+                    log.Debug( m => m( "Connect reader:[{0}]....", reader ) );
                     cad.Connect(reader, SHARE.Shared, PROTOCOL.T0orT1);
                     // Get the ATR of the card
                     byte[] atrValue = cad.GetAttribute(SCARD_ATTR_VALUE.ATR_STRING);
-                    log.Debug("ATR:[" + this.hexConverter.Bytes2Hex(atrValue) + "]");
+                    log.Debug( m => m( "ATR:[{0}]", this.hexConverter.Bytes2Hex(atrValue) ) );
                     cad.Disconnect(DISCONNECT.Unpower);
                 }
                 catch (Exception ex)
@@ -87,7 +87,7 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug(m => m("No reader exists!"));
                 return;
             }
             // 
@@ -100,19 +100,20 @@ namespace SmartCard.Pcsc.UnitTest
                 cad.OnCardInserted +=
                 (x) =>
                 {
-                    log.Debug(readers[j] + ": Card inserted....");
+                    log.Debug( m => m( "{0}: Card inserted....", readers[j] ) );
                 }
                 ;
                 cad.OnCardRemoved +=
                 (x) =>
                 {
-                    log.Debug(readers[j] + ": Card removed....");
+                    log.Debug( m => m("{0}: Card removed....", readers[j]));
                 }
                 ;
                 cad.StartCardEvents(readers[i]);
             }
-            log.Debug("Test card status for 20 secs...");
-            Thread.Sleep(20000);
+            int blockSecs = 20;
+            log.Debug( m => m( "Test card status for {0} secs...", blockSecs ) );
+            Thread.Sleep( blockSecs * 1000 );
             for (int i = 0; i < cads.Length; i++)
             {
                 ((CardNative)cads[i]).StopCardEvents();
@@ -125,18 +126,23 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug(m => m("No reader exists!"));
                 return;
             }
 
             foreach (string reader in readers)
             {
-                if (!(reader.StartsWith("CASTLES EZ710BU_CL") || reader.StartsWith("SCM Microsystems SCL3711 reader & NFC device") || reader.StartsWith("NXP PR533")))
+                if(
+                    !( reader.StartsWith("CASTLES EZ710BU_CL") ||
+                       reader.StartsWith("SCM Microsystems SCL3711 reader & NFC device") ||
+                       reader.StartsWith("NXP PR533")
+                     )
+                )
                 {
-                    log.Debug("Skip: [" + reader + "]....");
+                    log.Debug( m => m( "Skip: [{0}]....", reader ) );
                     continue;
                 }
-                log.Debug(String.Format("Connect:[{0}]...", reader));
+                log.Debug( m => m( "Connect:[{0}]...", reader ) );
                 this.cardNative.Connect(reader, SHARE.Shared, PROTOCOL.T0orT1);
                 // get uid from mifare card
                 APDUCommand cmd = new APDUCommand
@@ -147,10 +153,10 @@ namespace SmartCard.Pcsc.UnitTest
                   , 0x00
                   , null
                   , new byte[] { 0x00 }
-               );
-                log.Debug(cmd);
+                );
+                log.Debug( m => m( "APDU Command: {0}", cmd ) );
                 APDUResponse response = this.cardNative.Transmit(cmd);
-                log.Debug(response);
+                log.Debug( m => m( "APDU Response: {0}", response ) );
                 // disconnect...
                 this.cardNative.Disconnect(DISCONNECT.Unpower);
             }
@@ -162,19 +168,19 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug(m => m("No reader exists!"));
                 return;
             }
             foreach (string reader in readers)
             {
                 if (!(reader.StartsWith("CASTLES EZ710BU_CL") || reader.StartsWith("SCM Microsystems SCL3711 reader & NFC device") || reader.StartsWith("NXP PR533")))
                 {
-                    log.Debug("Skip: [" + reader + "]....");
+                    log.Debug( m => m( "Skip: [{0}]....", reader ) );
                     continue;
                 }
                 try
                 {
-                    log.Debug("Connect: [" + reader + "]....");
+                    log.Debug( m => m( "Connect: [{0}]....", reader ) );
                     this.cardNative.Connect(reader, SHARE.Shared, PROTOCOL.T0orT1);
 
                     APDUCommand cmd = new APDUCommand
@@ -186,11 +192,11 @@ namespace SmartCard.Pcsc.UnitTest
                       , null
                       , new byte[] { 0x00 }
                     );
-                    log.Debug(cmd);
 
+                    log.Debug(m => m("APDU Command: {0}", cmd));
                     APDUResponse response = this.cardNative.Transmit(cmd);
+                    log.Debug(m => m("APDU Response: {0}", response));
 
-                    log.Debug(response);
                     Assert.True((response.SW1 == 0x91) && (response.SW2 == 0xAF));
                     while (response.SW1 == 0x91 && response.SW2 == 0xAF)
                     {
@@ -203,15 +209,15 @@ namespace SmartCard.Pcsc.UnitTest
                           , null
                           , new byte[] { 0x00 }
                         );
-                        log.Debug(cmd);
 
+                        log.Debug(m => m("APDU Command: {0}", cmd));
                         response = this.cardNative.Transmit(cmd);
+                        log.Debug(m => m("APDU Response: {0}", response));
 
-                        log.Debug(response);
                         Assert.True(response.SW1 == 0x91);
                         if ((response.SW1 == 0x91) && (response.SW2 == 0x00))
                         {
-                            log.Debug("UID:[" + this.hexConverter.Bytes2Hex(this.byteWorker.SubArray(response.Data, 0, 7)) + "]");
+                            log.Debug( m => m( "UID:[{0}]", this.hexConverter.Bytes2Hex(this.byteWorker.SubArray(response.Data, 0, 7)) ) );
                         }
                     }
                 }
@@ -230,62 +236,70 @@ namespace SmartCard.Pcsc.UnitTest
             string[] readers = this.cardNative.ListReaders();
             if (readers == null)
             {
-                log.Debug("No reader exists!");
+                log.Debug(m => m("No reader exists!"));
                 return;
             }
             foreach (string reader in readers)
             {
-                log.Debug("Connect: [" + reader + "]....");
-                this.cardNative.Connect(reader, SHARE.Shared, PROTOCOL.T0orT1);
-
-                APDUCommand cmd = new APDUCommand
-                (
-                    //00A40100023F00
-                    0x00
-                  , 0xA4
-                  , 0x01
-                  , 0x00
-                  , new byte[] { 0x3F, 0x00 }
-                );
-                log.Debug(cmd);
-
-                APDUResponse response = this.cardNative.Transmit(cmd);
-                log.Debug(response);
-
-                cmd = new APDUCommand
-                (
-                    //00A40100029501
-                    0x00
-                  , 0xA4
-                  , 0x01
-                  , 0x00
-                  , new byte[] { 0x95, 0x01 }
-                );
-                log.Debug(cmd);
-
-                response = this.cardNative.Transmit(cmd);
-
-                log.Debug(response);
-                Assert.True((response.SW1 == 0x90) && (response.SW2 == 0x00));
+                if (!(reader.StartsWith("CASTLES EZ710BU_CL") || reader.StartsWith("SCM Microsystems SCL3711 reader & NFC device") || reader.StartsWith("NXP PR533")))
                 {
+                    log.Debug(m => m("Skip: [{0}]....", reader));
+                    continue;
+                }
+                try
+                {
+                    log.Debug(m => m("Connect: [{0}]....", reader));
+                    this.cardNative.Connect(reader, SHARE.Shared, PROTOCOL.T0orT1);
+
+
+                    APDUCommand cmd = new APDUCommand
+                    (
+                        //00A40100023F00
+                        0x00
+                      , 0xA4
+                      , 0x01
+                      , 0x00
+                      , new byte[] { 0x3F, 0x00 }
+                    );
+                    log.Debug(m => m("APDU Command: {0}", cmd));
+                    APDUResponse response = this.cardNative.Transmit(cmd);
+                    log.Debug(m => m("APDU Response: {0}", response));
+
                     cmd = new APDUCommand
                     (
+                        //00A40100029501
                         0x00
-                      , 0xAA
+                      , 0xA4
+                      , 0x01
                       , 0x00
-                      , 0x00
-                      , null
-                      , new byte[] { 0x00, 0x00, 00 }  // extended le (3)
+                      , new byte[] { 0x95, 0x01 }
                     );
-                    log.Debug(cmd);
-
+                    log.Debug(m => m("APDU Command: {0}", cmd));
                     response = this.cardNative.Transmit(cmd);
+                    log.Debug(m => m("APDU Response: {0}", response));
 
-                    log.Debug(response);
+                    Assert.True((response.SW1 == 0x90) && (response.SW2 == 0x00));
+                    {
+                        cmd = new APDUCommand
+                        (
+                            0x00
+                          , 0xAA
+                          , 0x00
+                          , 0x00
+                          , null
+                          , new byte[] { 0x00, 0x00, 00 }  // extended le (3)
+                        );
+                        log.Debug(m => m("APDU Command: {0}", cmd));
+                        response = this.cardNative.Transmit(cmd);
+                        log.Debug(m => m("APDU Response: {0}", response));
+                    }
+
+                    Assert.True((response.SW1 == 0x90) && (response.SW2 == 0x00));
                 }
-
-                Assert.True((response.SW1 == 0x90) && (response.SW2 == 0x00));
-
+                catch (Exception ex)
+                {
+                    log.Error(ex.Message);
+                }
                 // disconnect...
                 this.cardNative.Disconnect(DISCONNECT.Unpower);
             }
@@ -358,7 +372,7 @@ namespace SmartCard.Pcsc.UnitTest
             }
         }
 
-        [Test]
+        //[Test]
         public void Test07List3F00()
         {
             string[] readers = this.cardNative.ListReaders();
